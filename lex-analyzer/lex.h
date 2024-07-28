@@ -2,16 +2,17 @@
 #define LEX_H
 
 /* Arithmetic */
-#define PLUS_TOK '+'
-#define MINUS_TOK '-'
-#define MULT_TOK '*'
-#define DIV_TOK '/'
+#define PLUS_TOK "+"
+#define MINUS_TOK "-"
+#define MULT_TOK "*"
+#define DIV_TOK "/"
+#define MOD_TOK "%"
 
 /* Relational */
 #define EQ_TOK "=="
-#define LT_TOK '<'
+#define LT_TOK "<"
 #define LE_TOK "<="
-#define GT_TOK '>'
+#define GT_TOK ">"
 #define GE_TOK ">="
 #define NEQ_TOK "!="
 
@@ -27,8 +28,8 @@
 #define RSHIFT_TOK ">>"
 
 /* Additional */
-#define ASSIGN_TOK '='
-#define SEMICOLON_TOK ';'
+#define ASSIGN_TOK "="
+#define SEMICOLON_TOK ";"
 
 /* Reserved/Keyword */
 #define INTK_TOK "INT_KEYWORD"
