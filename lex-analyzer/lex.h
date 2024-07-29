@@ -19,6 +19,7 @@
 /* Logical */
 #define ANDL_TOK "&&"
 #define ORL_TOK "||"
+#define NOT_TOK "!"
 
 /* Bitwise */
 #define ANDB_TOK "&"
