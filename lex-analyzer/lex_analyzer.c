@@ -279,7 +279,7 @@ void lex_mult(Token *tok) {
 	if (c_ == '/') 
 		strcpy(tok->Type, RCOMMENT_TOK);
 	else {
-		strcpy(tok->Type, DIV_TOK);
+		strcpy(tok->Type, MULT_TOK);
 		fseek(input, -1, SEEK_CUR);
 	}
 	strcpy(tok->Value, "\0");
