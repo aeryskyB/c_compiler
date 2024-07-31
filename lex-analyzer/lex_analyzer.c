@@ -22,6 +22,10 @@ int isNamechar(char c);
 int isNum(char c);
 void lex_sp(Token *tok, char c);
 void lex_num(Token *tok, char c);
+int isRelationalLogicalBitwise(char c);
+void lex_bin(Token *tok, char c);
+void lex_div(Token *tok);
+void lex_mult(Token *tok);
 
 int main(int argc, char **argv) {
 
@@ -59,63 +63,72 @@ void lex_head(Token *tok) {
 		case '+':
 			strcpy(tok->Type, PLUS_TOK);
 			strcpy(tok->Value, "\0");
-			// +=, ++ (later)
 			return;
 		case '-':
 			strcpy(tok->Type, MINUS_TOK);
 			strcpy(tok->Value, "\0");
-			// -=, -- (later)
-			return;
-		case '*':
-			strcpy(tok->Type, MULT_TOK);
-			strcpy(tok->Value, "\0");
-			// treat pointer type during "data type" declaration
 			return;
 		case '/':
-			strcpy(tok->Type, DIV_TOK);
-			strcpy(tok->Value, "\0");
-			// don't remember
+			lex_div(tok);
+			return;
+		case '*':
+			lex_mult(tok);
 			return;
 		case '%':
 			strcpy(tok->Type, MOD_TOK);
 			strcpy(tok->Value, "\0");
-			// treat placeholder during string type prompts
+			// treat placeholder during string type prompts (later)
 			return;
 
-		/* relational */
-		case '=':
-			// call
+		case '^':
+			strcpy(tok->Type, XOR_TOK);
+			strcpy(tok->Value, "\0");
 			return;
-		case '<':
-			// call
-			return;
-		case '>':
-			// call
-			return;
-		case '!':
-			// call
-			return;
-
 
 		case ';':
 			strcpy(tok->Type, SEMICOLON_TOK);
 			strcpy(tok->Value, "\0");
 			return;
 
+		case ',':
+			strcpy(tok->Type, COMMA_TOK);
+			strcpy(tok->Value, "\0");
+			return;
+
+		case '{':
+			strcpy(tok->Type, LBRACE_TOK);
+			strcpy(tok->Value, "\0");
+			return;
+		
+		case '}':
+			strcpy(tok->Type, RBRACE_TOK);
+			strcpy(tok->Value, "\0");
+			return;
+
+		case '(':
+			strcpy(tok->Type, LPAREN_TOK);
+			strcpy(tok->Value, "\0");
+			return;
+
+		case ')':
+			strcpy(tok->Type, RPAREN_TOK);
+			strcpy(tok->Value, "\0");
+			return;
+		
 		case EOF:
 			strcpy(tok->Type, "\0");
 			strcpy(tok->Value, "\0");
 			return;
 	}
+
+	if (isRelationalLogicalBitwise(c))
+		lex_bin(tok, c);
 	
 	if (isNamechar(c))
 		lex_sp(tok, c);
 
 	if (isNum(c)) 
 		lex_num(tok, c);
-
-	// switch accordingly, and manage control flow
-	// return if valid, or invalid token
 }
 
 void lex_sp(Token *tok, char c) {
@@ -162,6 +175,116 @@ void lex_num(Token *tok, char c) {
 	fseek(input, -1, SEEK_CUR);
 }
 
+void lex_bin(Token *tok, char c) {
+	if (c == '=') {
+		c = fgetc(input);
+		if (c == '=') {
+			strcpy(tok->Type, EQ_TOK);
+		}
+		else {
+			strcpy(tok->Type, ASSIGN_TOK);
+			fseek(input, -1, SEEK_CUR);
+		}
+		strcpy(tok->Value, "\0");
+		return;
+	}
+
+	if (c == '<') {
+		c = fgetc(input);
+		if (c == '=')
+			strcpy(tok->Type, LE_TOK);
+		else if (c == '<')
+			strcpy(tok->Type, LSHIFT_TOK);
+		else {
+			strcpy(tok->Type, LT_TOK);
+			fseek(input, -1, SEEK_CUR);
+		}
+		strcpy(tok->Value, "\0");
+		return;
+	}
+
+	if (c == '>') {
+		c = fgetc(input);
+		if (c == '=')
+			strcpy(tok->Type, GE_TOK);
+		else if (c == '>')
+			strcpy(tok->Type, RSHIFT_TOK);
+		else {
+			strcpy(tok->Type, GT_TOK);
+			fseek(input, -1, SEEK_CUR);
+		}
+		strcpy(tok->Value, "\0");
+		return;
+	}
+
+	if (c == '!') {
+		c = fgetc(input);
+		if (c == '=')
+			strcpy(tok->Type, NEQ_TOK);
+		else {
+			strcpy(tok->Type, NOT_TOK);
+			fseek(input, -1, SEEK_CUR);
+		}
+		strcpy(tok->Value, "\0");
+		return;
+	}
+
+	if (c == '&') {
+		c = fgetc(input);
+		if (c == '&')
+			strcpy(tok->Type, ANDL_TOK);
+		else {
+			strcpy(tok->Type, ANDB_TOK);
+			fseek(input, -1, SEEK_CUR);
+		}
+		// treat "adress of" later
+		// (isNameChar(c))
+		strcpy(tok->Value, "\0");
+		return;
+	}
+
+	if (c == '|') {
+		c = fgetc(input);
+		if (c == '|')
+			strcpy(tok->Type, ORL_TOK);
+		else {
+			strcpy(tok->Type, ORB_TOK);
+			fseek(input, -1, SEEK_CUR);
+		}
+		strcpy(tok->Value, "\0");
+		return;
+	}
+}
+
+void lex_div(Token *tok) {
+	char c_ = fgetc(input);
+	if (c_ == '/') { /* a comment */
+		do {
+			c_ = fgetc(input);
+		} while (c_ != '\n' || c_ != EOF);
+		strcpy(tok->Type, "\0");
+	}
+	else if (c_ == '*') {
+		strcpy(tok->Type, LCOMMENT_TOK);
+	}	
+	else {
+		strcpy(tok->Type, DIV_TOK);
+		fseek(input, -1, SEEK_CUR);
+	}
+	strcpy(tok->Value, "\0");
+}
+
+void lex_mult(Token *tok) {
+	char c_ = fgetc(input);
+	if (c_ == '/') 
+		strcpy(tok->Type, RCOMMENT_TOK);
+	else {
+		strcpy(tok->Type, DIV_TOK);
+		fseek(input, -1, SEEK_CUR);
+	}
+	strcpy(tok->Value, "\0");
+}
+
 int isWhitespace(char c) {
 	// space, tab, line-feed, carriage return, etc.
 	return c == ' ' || c == '\t' || c == '\n' || c == '\r';
@@ -173,4 +296,8 @@ int isNamechar(char c) {
 
 int isNum(char c) {
 	return c >= '0' && c <= '9';
+}
+
+int isRelationalLogicalBitwise(char c) {
+	return c == '=' || c == '<' || c == '>' || c == '!' || c == '&' || c == '|';
 }

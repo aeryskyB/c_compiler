@@ -31,6 +31,9 @@
 /* Additional */
 #define ASSIGN_TOK "="
 #define SEMICOLON_TOK ";"
+#define COMMA_TOK ","
+#define INCR_TOK "INCREMENT"
+#define DECR_TOK "DECREMENT"
 
 /* Reserved/Keyword */
 #define INTK_TOK "INT_KEYWORD"
@@ -52,5 +55,8 @@
 #define RPAREN_TOK ")"
 #define LBRACE_TOK "{"
 #define RBRACE_TOK "}"
+
+#define LCOMMENT_TOK "LCOMMENT"
+#define RCOMMENT_TOK "RCOMMENT"
 
 #endif
