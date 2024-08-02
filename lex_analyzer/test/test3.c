@@ -1,3 +1,11 @@
+// this is a single-linear comment
+int a;
+
+/* 
+	this is a comment
+	which spans multiple lines
+*/
+
 int i = 12 * 11 - 10 / 2;
 int j = (20 << 3) + (20 >> 1);
 int k = i ^ j;

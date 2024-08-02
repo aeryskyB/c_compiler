@@ -261,7 +261,7 @@ void lex_div(Token *tok) {
 	if (c_ == '/') { /* a comment */
 		do {
 			c_ = fgetc(input);
-		} while (c_ != '\n' || c_ != EOF);
+		} while (c_ != '\n' && c_ != EOF);
 		strcpy(tok->Type, "\0");
 	}
 	else if (c_ == '*') {
