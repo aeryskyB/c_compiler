@@ -11,6 +11,7 @@ const Token = struct {
 
 const NULL: [1]u8 = [_]u8{0};
 var input: std.fs.File = undefined;
+var buf: [1]u8 = undefined;
 
 pub fn main() !void {
     // argument check
@@ -29,23 +30,21 @@ pub fn main() !void {
     // std.debug.print("{s}\n", .{macro.PLUS_TOK});
 
     // var reader = input.reader();
-    var buffer: [1]u8 = undefined;
     var tok = Token{ .type = [_]u8{0} ** TYPE_LEN, .value = [_]u8{0} ** VALUE_LEN };
-    while (try input.read(&buffer) != 0) {
-        if (buffer[0] == 0) break; // EOF
-        // std.debug.print("{c}", .{buffer[0]});
-        lex_head(&tok, &buffer);
+    while (try input.read(&buf) != 0) {
+        // std.debug.print("{c} ", .{buf[0]});
+        if (try lex_head(&tok) == 1) break;
         if (std.mem.indexOfScalar(u8, &tok.value, 0) != 0) {
-            try stdout.print("({s}, {s}) -> {d}\n", .{ tok.type, tok.value, tok.value.len });
+            try stdout.print("({s}, {s})\n", .{ tok.type, tok.value });
         } else if (std.mem.indexOfScalar(u8, &tok.type, 0) != 0) {
             try stdout.print("({s})\n", .{tok.type});
         }
     }
 }
 
-pub fn lex_head(tok_ptr: *Token, buf: []u8) void {
+pub fn lex_head(tok_ptr: *Token) !u1 {
     while (is_whitespace(buf[0])) {
-        input.read(&buf);
+        if (try input.read(&buf) == 0) return 1;
     }
     if (buf[0] == '+') {
         std.mem.copyForwards(u8, &(tok_ptr.type), macro.PLUS_TOK);
@@ -59,7 +58,11 @@ pub fn lex_head(tok_ptr: *Token, buf: []u8) void {
     } else if (buf[0] == '/') {
         std.mem.copyForwards(u8, &(tok_ptr.type), macro.DIV_TOK);
         std.mem.copyForwards(u8, &(tok_ptr.value), &NULL);
+    } else if (buf[0] == '%') {
+        std.mem.copyForwards(u8, &(tok_ptr.type), macro.MOD_TOK);
+        std.mem.copyForwards(u8, &(tok_ptr.value), &NULL);
     }
+    return 0;
 }
 
 pub fn is_whitespace(c: u8) bool {
