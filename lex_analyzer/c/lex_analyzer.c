@@ -24,6 +24,8 @@ void lex_sp(Token *tok, char c);
 void lex_num(Token *tok, char c);
 int isRelationalLogicalBitwise(char c);
 void lex_bin(Token *tok, char c);
+void lex_plus(Token *tok);
+void lex_minus(Token *tok);
 void lex_div(Token *tok);
 void lex_mult(Token *tok);
 
@@ -61,12 +63,10 @@ void lex_head(Token *tok) {
 	switch (c) {
 		/* arithmetic */
 		case '+':
-			strcpy(tok->Type, PLUS_TOK);
-			strcpy(tok->Value, "\0");
+			lex_plus(tok);
 			return;
 		case '-':
-			strcpy(tok->Type, MINUS_TOK);
-			strcpy(tok->Value, "\0");
+			lex_minus(tok);
 			return;
 		case '/':
 			lex_div(tok);
@@ -254,6 +254,28 @@ void lex_bin(Token *tok, char c) {
 		strcpy(tok->Value, "\0");
 		return;
 	}
+}
+
+void lex_plus(Token *tok) {
+	char c_ = fgetc(input);
+	if (c_ == '+') {
+		strcpy(tok->Type, INCR_TOK);
+	} else {
+		strcpy(tok->Type, PLUS_TOK);
+		fseek(input, -1, SEEK_CUR);
+	}
+	strcpy(tok->Value, "\0");
+}
+
+void lex_minus(Token *tok) {
+	char c_ = fgetc(input);
+	if (c_ == '-') {
+		strcpy(tok->Type, DECR_TOK);
+	} else {
+		strcpy(tok->Type, MINUS_TOK);
+		fseek(input, -1, SEEK_CUR);
+	}
+	strcpy(tok->Value, "\0");
 }
 
 void lex_div(Token *tok) {
